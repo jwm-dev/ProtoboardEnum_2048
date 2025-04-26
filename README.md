@@ -12,10 +12,14 @@ Okay, that's all great, but how do we find the number of possible protoboards?
 
 Well, this can be expressed as a simple combinatorics problem, but first, we need to realize one particular thing before we begin: 
 
-    In 2048, you start with exactly two tiles. Every time one makes a "move" (we can define a move in 2048 as shifting the tiles *and* the appearance of the new tile; a ply
-    might be considered just *one* of those events in isolation), there is necessarily an additional tile added to the board. Even if one manages to merge *every* existing
-    tile on the board down to a single tile, there is always an additional tile added that is not considered in the first ply of the move. Thus, the initial number of two
-    tiles represents the *minimum* number of tiles for any valid 2048 board. More concisely, boards with one or zero tiles are *not* valid game states.
+    In 2048, you start with exactly two tiles. Every time one makes a "move" 
+    (we can define a move in 2048 as shifting the tiles *and* the appearance 
+    of the new tile; a ply might be considered just *one* of those events in isolation), 
+    there is necessarily an additional tile added to the board. Even if one manages to 
+    merge *every* existing tile on the board down to a single tile, there is always an 
+    additional tile added that is not considered in the first ply of the move. Thus, the 
+    initial number of two tiles represents the *minimum* number of tiles for any valid 
+    2048 board. More concisely, boards with one or zero tiles are *not* valid game states.
 
 This isn't *strictly* necessary to consider, as it only eliminates 17 possible protoboards, but it will be important for symmetry later on. Considering the concept of a protoboard, we can reason that the pertinent information about a given board is the number of "tiles" on it (we will define "filled" protoboard cells to be "tiles"). We will call this variable *t*, for tiles! It is then obvious that on a 4x4 grid, we have 16 "categories" of protoboards, based on how many tiles, or what value of *t*, a given protoboard has.
 
