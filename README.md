@@ -1,4 +1,4 @@
-### 2048 Protoboard Enumeration Program
+# 2048 Protoboard Enumeration Program
 
 This program is a simple enumeration program to calculate all possible "protoboards" of the game 2048. A protoboard is defined to be a 4x4 binary board in which cells are either "empty" or "filled". This allows us to categorize the sum possible "shapes" that might appear in 2048 boards, regardless of tile types.
 
@@ -6,7 +6,7 @@ This program is a simple enumeration program to calculate all possible "protoboa
 
 We consider that the game 2048 takes place on a 4x4 square grid. Assuming win conditions are a 2048 tile being present on the board (classic 2048 rules), we have 11 possible tiles in 2048, ranging from 2^1=2 to 2^11=2048. One might naively assume empty cells in the grid must then be something of "zero" tiles but this is false. In order to continue the "rule" that tiles are powers of two, it would imply that 2^0=1 should be a tile. 2048, however, has no "1" tile and therefore has no zero tile either. By rule, 2048 only has {2^1, 2^2, 2^3, ... 2^11} tiles, meaning empty cells are **not** zero tiles, they are fundamentally *different* from tiles themselves. Thus, it is proactive to consider what I call protoboards. These are 4x4 matrices that contain binary cells that are either empty or tiled. This tells us all possible permutations of 2048 without considering *what specific tiles* are present on the board. My further work will explain *why* we might want to do this (it has to do with solving what I call "classic" or "traditional" 2048), but, for now suspend your disbelief and go along for the ride!
 
-# Method
+### Method
 
 Okay, that's all great, but how do we find the number of possible protoboards?
 
@@ -22,23 +22,39 @@ This is exactly what this small Rust program *does*. We know there are 65519 pos
 
 ---
 
-# Addendum
+### Addendum
+
 
 t = 2: 120 boards
+
 t = 3: 560 boards
+
 t = 4: 1820 boards
+
 t = 5: 4368 boards
+
 t = 6: 8008 boards
+
 t = 7: 11440 boards
+
 t = 8: 12870 boards
+
 t = 9: 11440 boards
+
 t = 10: 8008 boards
+
 t = 11: 4368 boards
+
 t = 12: 1820 boards
+
 t = 13: 560 boards
+
 t = 14: 120 boards
+
 t = 15: 16 boards
+
 t = 16: 1 boards
+
 
 The program will generate a small table (shown here) that outputs to the command line in addition to storing all indexed protoboards in a human-readable .txt format.
 
