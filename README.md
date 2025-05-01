@@ -1,73 +1,130 @@
-# 2048 Protoboard Enumeration Program
+# ProtoboardEnum_2048
 
-This program is a simple enumeration program to calculate all possible "protoboards" of the game 2048. A protoboard is defined to be a 4x4 binary board in which cells are either "empty" or "filled". This allows us to categorize the sum possible "shapes" that might appear in 2048 boards, regardless of tile types.
+**Enumerating All Valid Protoboards in Classic 2048**
 
-## Premise [What is a "protoboard"?]
-
-We consider that the game 2048 takes place on a 4x4 square grid. Assuming win conditions are a 2048 tile being present on the board (classic 2048 rules), we have 11 possible tiles in 2048, ranging from 2^1=2 to 2^11=2048. One might naively assume empty cells in the grid must then be something of "zero" tiles but this is false. In order to continue the "rule" that tiles are powers of two, it would imply that 2^0=1 should be a tile. 2048, however, has no "1" tile and therefore has no zero tile either. By rule, 2048 only has {2^1, 2^2, 2^3, ... 2^11} tiles, meaning empty cells are **not** zero tiles, they are fundamentally *different* from tiles themselves. Thus, it is proactive to consider what I call protoboards. These are 4x4 matrices that contain binary cells that are either empty or tiled. This tells us all possible permutations of 2048 without considering *what specific tiles* are present on the board. My further work will explain *why* we might want to do this (it has to do with solving what I call "classic" or "traditional" 2048), but, for now suspend your disbelief and go along for the ride!
-
-### Method
-
-Okay, that's all great, but how do we find the number of possible protoboards?
-
-Well, this can be expressed as a simple combinatorics problem, but first, we need to realize one particular thing before we begin: 
-
-    In 2048, you start with exactly two tiles. Every time one makes a "move" 
-    (we can define a move in 2048 as shifting the tiles *and* the appearance 
-    of the new tile; a ply might be considered just *one* of those events in isolation), 
-    there is necessarily an additional tile added to the board. Even if one manages to 
-    merge *every* existing tile on the board down to a single tile, there is always an 
-    additional tile added that is not considered in the first ply of the move. Thus, the 
-    initial number of two tiles represents the *minimum* number of tiles for any valid 
-    2048 board. More concisely, boards with one or zero tiles are *not* valid game states.
-
-This isn't *strictly* necessary to consider, as it only eliminates 17 possible protoboards, but it will be important for symmetry later on. Considering the concept of a protoboard, we can reason that the pertinent information about a given board is the number of "tiles" on it (we will define "filled" protoboard cells to be "tiles"). We will call this variable *t*, for tiles! It is then obvious that on a 4x4 grid, we have 16 "categories" of protoboards, based on how many tiles, or what value of *t*, a given protoboard has.
-
-Now, generally, on a 4x4 grid-board with *two* discrete options for each square of the grid, we can say there are (cell types = tiles + cells = 2)^(total num of board cells = 16). Less generally, we have 2^16=65536 possible protoboards for a 4x4 game board with two possible entries for a given cell. However, notice that t=0 and t=1 are not valid board states. So, how did I know that these t-values represent specifically *17* of the possible *65536* protoboards for a 4x4 grid? We need a way to associate t-values to protoboards somehow, and we can do just that with a binomial coefficient, C(n, k). Considering C(n=16, k=t) for a given t-value, we can get the specific portion of the sum 65536 possible protoboards that a given *category defined by t-value* takes up. This is because a binomial coefficient represents the number of ways to choose *t* items from *n* with no regard to order, which is exactly what we are doing here! This also explains how we got 17 earlier, as C(16, 0) = 1 [an empty board] and C(16, 1) = 16 [a tile in every given possible position]. That means that there are *17* total boards that are not possible from the outset that we can readily exclude from here on out, bringing out total protoboard count *down* from 2^16 to 2^16 - 17 = 65519 possible protoboards.
-
-This is exactly what this small Rust program *does*. We know there are 65519 possible protoboards and this lets us *categorize* and *index* them all in a manner that is logically consistent, and importantly, reversible. For example, for t=2, meaning "2048 boards that have two and only two tiles on them" (this includes all starting boards, note!), we can calculate C(16, 2) = 120, meaning that of the possible 65519 shapes a 2048 board can legally take, 120 of them represent board shapes with only two tiles.
+This Rust program enumerates all valid "protoboards"—binary representations of 2048 game boards where each 4×4 cell is either filled or empty. This abstraction allows analysis of the spatial structure of 2048 boards without considering specific tile values, providing a foundation for deeper combinatorial and probabilistic research on the game.
 
 ---
 
-### Addendum
+## 🔍 What Is a "Protoboard"?
 
+A protoboard is a 4×4 grid that defines whether each cell is **filled** (contains a tile) or **empty**. Unlike actual 2048 boards that include tile values (powers of two), protoboards focus purely on the **presence** or **absence** of tiles. This abstraction is useful for categorizing the structural forms of possible 2048 game states.
 
-t = 2: 120 boards
+### Why This Abstraction?
 
-t = 3: 560 boards
+- In 2048, tiles are always powers of two: \(2^1=2\) through \(2^{11}=2048\).
+- **Empty cells are not zero tiles**—they are *categorically distinct*.
+- Because every game starts with exactly two tiles and adds one new tile per move, valid boards can never have fewer than two tiles.
 
-t = 4: 1820 boards
+By categorizing over the number of filled cells, ``t`` , we can compute all valid binary protoboards using combinatorics.
 
-t = 5: 4368 boards
+---
 
-t = 6: 8008 boards
+## 📐 Methodology
 
-t = 7: 11440 boards
+We define $\( t \in \{2, 3, ..., 16\} \)$ as the number of tiles (filled cells) on a 4×4 grid. There are $\binom{16}{t}$ protoboards for each value of $\( t \)$, as each combination corresponds to one specific filled pattern.
 
-t = 8: 12870 boards
+The total number of possible binary protoboards is:
 
-t = 9: 11440 boards
+$\[ 2^{16} = 65536 \]$
 
-t = 10: 8008 boards
+However, $\binom{16}{0} = 1$ and $\binom{16}{1} = 16$ represent boards with zero or one tile, which are **explicitly** invalid under 2048 rules. We exclude these 17 cases:
 
-t = 11: 4368 boards
+$\text{Valid protoboards} = 65536 - 17 = 65519$
 
-t = 12: 1820 boards
+This program enumerates and indexes all 65519 valid protoboards. We don't consider whether a board is *reachable* through legal moves, however. This is for research purposes, some "illegal" boardstates (excluding the aformentioned 17) might be of interest when it comes to solving the stochastic variant of the game.
 
-t = 13: 560 boards
+### Summary Table of Protoboards by Tile Count \( t \):
 
-t = 14: 120 boards
+```text
+t = 2:    120
 
-t = 15: 16 boards
+t = 3:    560
 
-t = 16: 1 boards
+t = 4:   1820
 
+t = 5:   4368
 
-The program will generate a small table (shown here) that outputs to the command line in addition to storing all indexed protoboards in a human-readable .txt format.
+t = 6:   8008
 
-Because, by modern standards, 65519 really isn't *that large* of a number: we can just naively bruteforce all these possible boards, which is what the program does. Depending on hardware, this should likely take milliseconds at most. Astute readers will notice that this table is *symmetric* about t=8, if we realize that t=15 and t=16 account for 17 boards similar to the values for t=0 and t=1 we initially excluded. This is a general property of binomial coefficients, which can be stated as either C(n, k) is symmetric about k=n/2 *or* C(n, k) == C(n, n - k). This symmetry will be important later for optimizing, because while we only have to consider the relatively small number of protoboards, once we start to consider actual tile values we end up getting **massive** numbers of possible boards *generally* for the game. 
+t = 7:  11440
 
-To realize *just how large* this number gets, we can relate this framework to the tileset system in 2048. Tiles in 2048 are a power of two, with lowest being 2 and the highest being, well, 2048 (if we abide by the "classic" 2048 defintion earlier). Defining our winning condition as the presence of a 2^11=2048 tile, we can consider there to be **11** possible tiles in legal, classic 2048 gameplay {2^1, 2^2, 2^3, ... 2^11}. 
-This means, *for a* ***single*** *given protoboard*, there are **11^t** possible states when considering unique tiles, unlike when generalizing to tiles vs empty cells. Considering we have 65519 possible protoboards, and **each** one represents 11^t possible real board states, the real number of possible 2048 games is in the order of billions or quintillions of games. 11^8=214358881 alone, and having 12870 possible protoboards for t=8 means we have (11^8) * (12870) = **2.7587988e+12** possible real boards *just for boards with eight tiles alone*! This is, obviously, intractible.
+t = 8:  12870
 
-Next write up we will explore exploiting both symmetry of binomial coefficients and the symmetry of the 2048 board itself to *massively* reduce this number, as well as anticipate a method for cataloguing **all** possible 2048 boards using techniques similar to Jonathan Basile's *genius* project, libraryofbabel.info in order to create something of a "Library of 2048". This will be the first step in devising a general solution/strategy for what we have defined as classic 2048. How fun!
+t = 9:  11440
+
+t = 10:  8008
+
+t = 11:  4368
+
+t = 12:  1820
+
+t = 13:   560
+
+t = 14:   120
+
+t = 15:    16
+
+t = 16:     1
+```
+
+This table is symmetric due to the identity $\( \binom{n}{k} = \binom{n}{n-k} \)$. This symmetry will later be used for computational and storage optimizations.
+
+---
+
+## 🚀 What This Program Does
+
+- Iterates through $\( t = 2 \)$ to $\( t = 16 \)$
+- Uses $\( \binom{16}{t} \)$ to enumerate all valid protoboard layouts
+- Outputs:
+  - A summary table of board counts by $\( t \)$
+  - A `protoboards.txt` file with each board's binary representation and index
+
+> Generation time: negligible on modern hardware (~milliseconds)
+
+---
+
+## 🔢 Why This Matters
+
+Each protoboard represents a **template** into which actual tile values can be inserted. Given 11 valid tile values in 2048, a single protoboard with \( t \) tiles yields:
+
+$\[ \text{Real boards per protoboard} = 11^t \]$
+
+The full number of actual game states is:
+
+$\[ \sum_{t=2}^{16} \binom{16}{t} \cdot 11^t \]$
+
+For example:
+- $\( t = 8 \)$: $\( 11^8 = 214,358,881 \)$
+- $\( \binom{16}{8} = 12870 \)$
+- $\( 214,358,881 \cdot 12870 = 2.76 \cdot 10^{12} \)$ boards *just for* $\( t = 8 \)$
+
+This makes brute-force analysis of full 2048 states intractable—but protoboards give us a tractable entry point.
+
+---
+
+## 🛠️ How to Use
+
+```bash
+git clone https://github.com/jwm-dev/ProtoboardEnum_2048.git
+cd ProtoboardEnum_2048
+cargo run --release
+```
+
+- Output will go to `protoboards.txt` and print summary stats to terminal.
+- File is usable by external tools like [`BoardViewer_2048`](https://github.com/jwm-dev/BoardViewer_2048)
+
+---
+
+## 📌 Next Steps
+
+Future work will:
+- Leverage symmetry to compress and index tile arrangements
+- Merge tile value enumeration with spatial protoboards to create a deterministic 2048 state engine
+- Serve as foundation for a solvable model of classic 2048
+
+For a fully integrated GUI version with board browsing, see: [`LibraryOf2048`](https://github.com/jwm-dev/LibraryOf2048)
+
+---
+
+*This is the foundational layer of the "Library of 2048": a combinatorially exhaustive map of every board the game can present.*
